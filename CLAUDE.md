@@ -60,7 +60,7 @@ bind-mounted directory, so it survives restarts and rebuilds.
 ## How it works
 
 - **Catalogue** comes from one ARY endpoint that returns the whole browsable
-  home layout — 34 rails, 228 real series after filtering. Synced daily.
+  home layout — 34 rails, 228 real series after filtering.
 - **Promo filtering** matters: ad slots, house promos and live channels sit in
   the same rails as real series. They are dropped by the absence of a poster,
   which turned out to be the only reliable discriminator. Do not filter on the
@@ -77,6 +77,33 @@ bind-mounted directory, so it survives restarts and rebuilds.
 - **Files** land in the Jellyfin TV library using the existing Sonarr naming
   convention, written to a staging directory on the same filesystem and moved
   with an atomic rename so Jellyfin never indexes a partial file.
+- **Posters** need `<meta name="referrer" content="no-referrer">` on the
+  document. ARY's image CDN is hotlink-protected: no Referer or one from
+  aryplus.tv is served, anything else gets a 403. It must be the document
+  policy, not a per-`<img>` attribute, because the series hero paints its
+  backdrop with a CSS `background-image` and CSS has no `referrerpolicy`.
+
+## Scheduling
+
+Two APScheduler jobs, both on **cron triggers pinned to wall-clock times**:
+
+| Job | When | Env |
+|---|---|---|
+| Monitor sweep | every hour, on the hour | `MONITOR_CRON_MINUTE` |
+| Catalogue refresh | daily at 04:17 | `CATALOG_CRON_HOUR`, `CATALOG_CRON_MINUTE` |
+| One-shot sweep after boot | 2 minutes after start | `MONITOR_STARTUP_DELAY_SECONDS` |
+
+They were interval triggers until the cron switch, and that was a real bug
+rather than a preference: **an interval trigger counts from process start**, so
+every restart pushed the next run a full period into the future and a service
+restarted often enough would never sweep at all. A monitor added and then
+followed by a restart sat with `lastCheck: None` indefinitely. The boot sweep
+closes the remaining gap between a restart and the next hour boundary.
+
+Because two triggers can now call it, `check_monitors` is **non-reentrant** —
+overlapping sweeps would race on the same episodes and trip the `UNIQUE`
+constraint on `jobs.episode_id`, so a second caller steps aside and returns 0.
+The times are logged on startup; grep the container log for `schedule:`.
 
 ## This repo
 

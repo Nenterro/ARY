@@ -152,7 +152,7 @@ export default function Series() {
             <ArrowLeft size={19} />
           </Link>
 
-          {data.poster && <img className="hero-poster" src={data.poster} alt="" />}
+          {data.poster && <img className="hero-poster" src={data.poster} alt="" referrerPolicy="no-referrer" />}
 
           <div className="hero-meta">
             <h2>{data.title}</h2>

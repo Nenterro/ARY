@@ -107,7 +107,7 @@ export default function Monitors() {
           {monitors.map((m) => (
             <div key={m.id} className="monitor-row glass-panel">
               <Link to={`/series/${m.seriesId}`} className="monitor-poster">
-                {m.poster ? <img src={m.poster} alt="" loading="lazy" /> : <Radar size={20} />}
+                {m.poster ? <img src={m.poster} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <Radar size={20} />}
               </Link>
 
               <div className="monitor-body">

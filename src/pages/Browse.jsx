@@ -140,7 +140,7 @@ export default function Browse() {
             <Link key={s.id} to={`/series/${s.id}`} className="poster-card">
               <div className="poster-image">
                 {s.poster ? (
-                  <img src={s.poster} alt="" loading="lazy" />
+                  <img src={s.poster} alt="" loading="lazy" referrerPolicy="no-referrer" />
                 ) : (
                   <div className="poster-fallback">{s.title.slice(0, 1)}</div>
                 )}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutGrid, ListVideo, HardDrive, Radar, Settings as SettingsIcon, Tv, Pin, PinOff } from 'lucide-react';
+import { LayoutGrid, ListVideo, HardDrive, Radar, CalendarDays, Settings as SettingsIcon, Tv, Pin, PinOff } from 'lucide-react';
 import { useStatus } from '../context/StatusContext';
 import './Layout.css';
 
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { path: '/queue', label: 'Queue', icon: ListVideo },
   { path: '/library', label: 'Library', icon: HardDrive },
   { path: '/monitors', label: 'Monitors', icon: Radar },
+  { path: '/schedule', label: 'Schedule', icon: CalendarDays },
   { path: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 

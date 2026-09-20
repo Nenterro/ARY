@@ -287,3 +287,17 @@
     flex-shrink: 0;
   }
 }
+
+/* Six destinations: on a narrow phone the pill nav needs the icons to give up
+   a little width, or the row overflows its own rounded container. */
+@media (max-width: 420px) {
+  .bottom-nav {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .bottom-nav .nav-item {
+    width: 42px;
+    height: 42px;
+  }
+}

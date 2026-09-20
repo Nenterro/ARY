@@ -1,0 +1,265 @@
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 0.18s ease;
+}
+
+.cal-day.today {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-glow);
+}
+
+/* Days already gone read as background, not as things still to come. */
+.cal-day.past { opacity: 0.55; }
+.cal-day.empty { background: rgba(30, 30, 40, 0.4); }
+
+.cal-day-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 11px 13px 9px 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+}
+
+.cal-weekday {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.cal-daynum {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cal-day.today .cal-weekday,
+.cal-day.today .cal-daynum {
+  color: var(--accent-color);
+}
+
+.cal-today-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-color);
+  margin-left: auto;
+  align-self: center;
+}
+
+.cal-airings {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+}
+
+.cal-none {
+  margin: auto;
+  color: var(--text-muted);
+  opacity: 0.4;
+  font-size: 1rem;
+}
+
+.cal-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.16s ease;
+}
+
+.cal-item:hover {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+.cal-item.aired { opacity: 0.7; }
+
+.cal-item-thumb {
+  width: 26px;
+  aspect-ratio: 280 / 400;
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.cal-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cal-item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.cal-item-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-item-meta {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A known episode is a fact; a projected one is dashed so it never reads as
+   something we were told. */
+.ep-known {
+  color: #6ee7b7;
+  font-weight: 700;
+}
+
+.ep-est {
+  color: var(--accent-color);
+  font-weight: 700;
+  border-bottom: 1px dashed currentColor;
+}
+
+.cal-legend {
+  margin: 16px 4px 0 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* UNSCHEDULED */
+.cal-unscheduled {
+  margin-top: 18px;
+  padding: 18px 20px;
+}
+
+.cal-unsched-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.cal-unsched-head svg { color: var(--text-muted); }
+
+.cal-unscheduled p {
+  font-size: 0.79rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 13px;
+}
+
+.cal-unsched-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.cal-unsched-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.79rem;
+  font-weight: 600;
+  transition: all 0.16s ease;
+}
+
+.cal-unsched-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.cal-unsched-item img {
+  width: 22px;
+  aspect-ratio: 280 / 400;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* A seven-column grid is unreadable on a phone, so the week becomes a list
+   and empty days collapse to a single line instead of a tall blank card. */
+@media (max-width: 900px) {
+  .cal-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cal-day {
+    min-height: 0;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .cal-day-head {
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    min-width: 62px;
+    padding: 10px 8px;
+  }
+
+  .cal-today-dot {
+    margin-left: 0;
+    margin-top: 3px;
+  }
+
+  .cal-airings {
+    padding: 8px;
+  }
+
+  .cal-day.empty .cal-airings {
+    padding: 4px 8px;
+  }
+
+  .cal-none {
+    margin: auto 0 auto 4px;
+    font-size: 0.8rem;
+  }
+
+  .cal-item-title { font-size: 0.82rem; }
+  .cal-item-meta { font-size: 0.72rem; }
+  .cal-item-thumb { width: 30px; }
+}

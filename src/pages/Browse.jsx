@@ -84,7 +84,7 @@ export default function Browse() {
           <input
             className="text-input"
             type="search"
-            placeholder="Search dramas, telefilms, movies…"
+            placeholder="Search dramas…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />

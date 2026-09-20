@@ -60,7 +60,8 @@ bind-mounted directory, so it survives restarts and rebuilds.
 ## How it works
 
 - **Catalogue** comes from one ARY endpoint that returns the whole browsable
-  home layout — 34 rails, 228 real series after filtering.
+  home layout — 34 rails, 228 real series after promo filtering, narrowed to
+  **94 dramas** by the scope rule below.
 - **Promo filtering** matters: ad slots, house promos and live channels sit in
   the same rails as real series. They are dropped by the absence of a poster,
   which turned out to be the only reliable discriminator. Do not filter on the
@@ -82,6 +83,43 @@ bind-mounted directory, so it survives restarts and rebuilds.
   aryplus.tv is served, anything else gets a 403. It must be the document
   policy, not a per-`<img>` attribute, because the series hero paints its
   backdrop with a CSS `background-image` and CSS has no `referrerpolicy`.
+
+## Catalogue scope — dramas only
+
+`DRAMAS_ONLY=1` narrows the index to scripted drama series. Everything else ARY
+carries — films, telefilms, trailers, OSTs, talk and game shows, cricket,
+religious programming, live channels — is dropped at sync time. Set it to `0`
+to index all 228 again.
+
+Two fields do the work, and neither is named helpfully:
+
+- **`seriesType`** separates the formats: `show` is episodic, `singleVideo`
+  covers films, telefilms, trailers and OSTs, `programs` covers talk and game
+  shows, `live` is a channel feed. Only `show` survives.
+- **`genreId`** is a **list of genre names**, not an id.
+
+Within `show`, the rule **excludes** by genre (`Sports`, `Religious`,
+`Podcast`, `Biographies`, …) rather than requiring a literal `Drama` tag.
+That is deliberate and was measured: requiring the tag keeps 92 titles but
+silently loses *Main Tera* and *Pyare Afzal*, both genuine dramas that happen
+to be tagged only `Romance`. Excluding instead keeps 94 and still drops all
+the cricket and religious programming. **Do not "simplify" this back to an
+inclusion rule.**
+
+Two supporting details:
+
+- `_walk_series` keeps the **richest** record per series. The same series
+  appears in several rails at different levels of detail — the slider carries
+  little more than an id and a title, while category rails carry `seriesType`
+  and `genreId`. Taking the first one seen would leave the filter judging a
+  stub with none of the fields it needs.
+- `sync_catalog` **prunes** series the scope no longer covers, because sync
+  otherwise only ever upserts and an earlier wider sync would linger forever.
+  Monitored series and those with download history are kept regardless, so
+  narrowing the scope never discards an active monitor or orphans a job row.
+
+Rail filters need no maintenance: they are computed from what is stored, so
+`MOVIES`, `PODCASTS`, `OST` and `SPORTS` disappeared on their own (34 → 22).
 
 ## Scheduling
 

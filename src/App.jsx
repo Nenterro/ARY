@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import Browse from './pages/Browse';
 import Series from './pages/Series';
 import Queue from './pages/Queue';
+import Library from './pages/Library';
 import Monitors from './pages/Monitors';
 import Settings from './pages/Settings';
 import { StatusProvider } from './context/StatusContext';
@@ -16,6 +17,7 @@ export default function App() {
             <Route index element={<Browse />} />
             <Route path="series/:seriesId" element={<Series />} />
             <Route path="queue" element={<Queue />} />
+            <Route path="library" element={<Library />} />
             <Route path="monitors" element={<Monitors />} />
             <Route path="settings" element={<Settings />} />
           </Route>

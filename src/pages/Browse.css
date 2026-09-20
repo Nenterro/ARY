@@ -205,3 +205,77 @@
 
   .poster-title { font-size: 0.78rem; }
 }
+
+/* Search + sort row */
+.controls-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.controls-row .search-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.sort-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: border-color 0.18s ease;
+}
+
+.sort-box:focus-within {
+  border-color: var(--accent-color);
+}
+
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 11px 4px 11px 0;
+  cursor: pointer;
+}
+
+/* The native dropdown list is painted by the OS, so it needs explicit colours
+   to stay legible against the dark shell. */
+.sort-select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.poster-air {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: -4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 560px) {
+  .controls-row {
+    flex-direction: column;
+  }
+
+  .sort-box {
+    justify-content: space-between;
+  }
+
+  .sort-select {
+    flex: 1;
+    padding-left: 6px;
+  }
+}

@@ -121,6 +121,58 @@ Two supporting details:
 Rail filters need no maintenance: they are computed from what is stored, so
 `MOVIES`, `PODCASTS`, `OST` and `SPORTS` disappeared on their own (34 → 22).
 
+## Resolution
+
+The ladder varies per title. Most dramas top out at 1080p, but some publish
+1440p and 2160p — *Ae Dil* carries a full 3840x2160 rendition. The selector
+takes the best available up to `MAX_HEIGHT` (2160) rather than pinning to one
+resolution.
+
+The filename's resolution is **measured with ffprobe from the finished file**,
+not taken from the format ARY advertised. The ladder describes what a rendition
+should be; ffprobe reports what actually landed, and the filename is what
+Jellyfin reads. `SOURCE_TAG` supplies the `WEBDL` half, and a file whose height
+cannot be probed is tagged plain `WEBDL` rather than guessed at.
+
+This is why `episode_path()` is built *after* the download rather than before.
+`existing_episode()` matches on the `S01E07` token alone, so it still finds a
+file whose quality tag has changed.
+
+## Sorting
+
+`/api/catalog?sort=` accepts `title`, `added`, `release`, `episodes`, and
+`/api/sorts` lists them so the UI does not hardcode the set.
+
+Dates are the awkward part. **ARY populates `releaseDate` on roughly 40% of the
+catalogue** (36 of 94 at last sync), so sorting on it alone scatters the rest
+arbitrarily. Every `_id` is a Mongo ObjectId whose leading four bytes are a
+creation timestamp, which gives a date for **100%** of the catalogue for free —
+stored as `added_at` and used as the tie-breaker everywhere.
+
+`releaseDate` lives only on `/api/series/<id>`, not in the home payload, so
+`enrich_details()` fetches it one series at a time. It stamps
+`detail_synced_at` whether or not a date came back and retries monthly, so the
+first sync costs ~94 requests (about 14s) and later syncs cost nearly nothing.
+
+`episode_count` is stored from the catalogue payload now. It was parsed but
+never written, which is why every card read `0 ep` until a series was opened.
+The upsert keeps `MAX(existing, incoming)` so a locally indexed count, which is
+authoritative, is not overwritten by the catalogue's summary figure.
+
+## Library
+
+`/api/library` reads the **filesystem**, not the jobs table. The two answer
+different questions: jobs record what this service did, while the library is
+what Jellyfin actually sees, so files added by hand or deleted outside the app
+only read correctly from disk.
+
+It defaults to `scope=ary`, and that matters for more than tidiness. The
+library root is shared with Sonarr — 28 other shows, 1052 files, 1.5TB — so an
+unfiltered walk both answers the wrong question and costs seconds. Folders are
+matched against the catalogue **before** being walked, which keeps a rescan at
+about 0.1s. `scope=all` still reports everything, which is the way to spot an
+ARY series whose folder name has drifted from its title.
+
 ## Scheduling
 
 Two APScheduler jobs, both on **cron triggers pinned to wall-clock times**:

@@ -8,6 +8,17 @@ import { apiGet, apiPost, apiDelete } from '../utils/api';
 import { useStatus } from '../context/StatusContext';
 import './Series.css';
 
+// ARY exposes no per-episode date, but every episode id is an ObjectId whose
+// leading bytes encode when it was created, which is when the episode landed.
+function releasedLabel(ts) {
+  const then = new Date(ts * 1000);
+  const days = Math.floor((Date.now() - then.getTime()) / 86400000);
+  if (days < 1) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  return then.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function fmtDuration(seconds) {
   if (!seconds) return '';
   const m = Math.round(seconds / 60);
@@ -288,6 +299,7 @@ export default function Series() {
                 <div className="ep-title">{ep.title}</div>
                 <div className="ep-sub">
                   {fmtDuration(ep.duration)}
+                  {ep.releasedAt && ` · ${releasedLabel(ep.releasedAt)}`}
                   {ep.job?.status === 'failed' && ep.job.error && (
                     <span className="ep-error" title={ep.job.error}>· {ep.job.error.split('\n')[0].slice(0, 80)}</span>
                   )}

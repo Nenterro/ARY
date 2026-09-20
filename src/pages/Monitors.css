@@ -103,3 +103,69 @@
   .monitor-poster { width: 38px; }
   .monitor-title { font-size: 0.87rem; }
 }
+
+/* SCHEDULE + TIMELINE */
+.monitor-schedule {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.monitor-schedule svg {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.monitor-schedule.muted,
+.monitor-schedule.muted svg {
+  color: var(--text-muted);
+}
+
+.sched-text {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Inferred schedules are labelled, never passed off as ARY's own data. */
+.sched-est {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-muted);
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: help;
+}
+
+.monitor-timeline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.monitor-timeline b {
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.monitor-timeline .next-up b {
+  color: var(--accent-color);
+}
+
+@media (max-width: 767px) {
+  /* The absolute date is the first thing to lose; the countdown carries it. */
+  .monitor-timeline { gap: 10px; font-size: 0.72rem; }
+  .sched-est { display: none; }
+}

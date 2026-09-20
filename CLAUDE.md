@@ -157,6 +157,43 @@ rejects anything outside `(1080, 1440, 2160)` rather than coercing it, because
 a typo silently becoming a 240p download would only be discovered once the
 file was already in the library.
 
+## Broadcast schedules (`airing.py`)
+
+Monitors show when a series airs and how long until the next episode. Both
+halves of that are harder than they look.
+
+**The declared schedule is free text.** `day` and `time` are typed by hand into
+ARY's CMS and arrive in whatever shape the author chose — real values include
+`Mon-Tue`, `Fri - Sat`, `Wed & Thu`, `THUR & FRI`, `Friday - Saturday`,
+`Daily`, `Mon to Sun`, `Every Thrusaday`, `08:00 PM`, `8 : 00 PM`, `9 PM`,
+`7:00`. Days are matched on a **three-letter prefix**, which absorbs the
+abbreviations and the misspellings together (`Thr`, `Thur` and `Thrusaday` all
+reduce to `thr`). A hyphen or `to` between exactly two days is an inclusive
+range; `&` and `,` are a list.
+
+Two series have their **own title in the day field** (`Inteha`, `Sher`). Any
+value yielding no recognisable weekday is treated as having no schedule rather
+than being guessed at.
+
+Times without AM/PM are read as **evening** — every dated slot in the catalogue
+falls between 7pm and 9pm, and a 7am drama broadcast is not a thing.
+
+**Only a third of the catalogue declares a schedule at all** (31 of 94), and
+the gap includes currently-airing shows: Dar-E-Nijaat has `day=""` and
+`time=""` upstream. So where nothing is declared, the schedule is **inferred
+from when episodes actually appeared** — every episode id is an ObjectId
+carrying its creation time. Dar-E-Nijaat publishes 7 Fridays and 8 Saturdays
+around 8pm across 15 episodes, which inference recovers as "Fri & Sat, around
+8 PM".
+
+Inference refuses rather than guesses: it needs at least 4 episodes, each kept
+weekday must carry 20% of them, and the kept days must explain 65% of all
+episodes. A show that published erratically reads as "no schedule", not as a
+confident prediction that will be wrong every week. Inferred schedules are
+**labelled `estimated` in the UI** and never passed off as ARY's own data.
+
+`resolve()` is the entry point: declared wins, inference is the fallback.
+
 ## Disk is the source of truth, not the jobs table
 
 A job marked `done` means only that this service downloaded the file once. If

@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vercel
+.DS_Store
+
+# Private infrastructure detail (SSH host, paths, tokens). The repo is public.
+CLAUDE.local.md
+
+# The backend lives on the home server only, never in this repo.
+backend/

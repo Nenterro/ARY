@@ -138,6 +138,41 @@ This is why `episode_path()` is built *after* the download rather than before.
 `existing_episode()` matches on the `S01E07` token alone, so it still finds a
 file whose quality tag has changed.
 
+### Choosing a resolution
+
+Where a title offers more than one, the UI shows a picker and the choice rides
+along as `maxHeight` on both the request and the monitor. It is stored per job
+(`jobs.max_height`) and per monitor (`monitors.max_height`), so a monitor set
+to 1080p keeps fetching 1080p as new episodes appear. `NULL` means the server
+default.
+
+The ladder itself is a property of the **title**, not the episode, so it is
+read once from the newest episode's master playlist and cached in
+`series.heights_json`, re-probed monthly. Asking per episode would mean an
+extra HTTP round trip for every row in the list.
+
+Only 1080p and above are offered as choices — 720p and below are never what
+someone means by picking a quality for a drama library. `_clean_height()`
+rejects anything outside `(1080, 1440, 2160)` rather than coercing it, because
+a typo silently becoming a 240p download would only be discovered once the
+file was already in the library.
+
+## Disk is the source of truth, not the jobs table
+
+A job marked `done` means only that this service downloaded the file once. If
+it is later deleted outside the app, the episode is genuinely missing, and
+both the UI and `queue_episode()` must treat it as re-requestable.
+
+They did not, at first: `queue_episode()` returned `existing` for any `done`
+job before ever looking at the disk, and `series_detail` reported the stale
+job, so the row rendered a "Done" pill with no download button. Deleting a
+file left the episode permanently unfetchable.
+
+Now `queue_episode()` checks the filesystem **first**, and only `queued` or
+`downloading` blocks a new request; `series_detail` drops a `done` job whose
+file is absent. The same principle drives the Library tab reading the
+filesystem rather than the jobs table — if these ever disagree, disk wins.
+
 ## Sorting
 
 `/api/catalog?sort=` accepts `title`, `added`, `release`, `episodes`, and

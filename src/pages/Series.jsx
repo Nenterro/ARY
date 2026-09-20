@@ -24,6 +24,8 @@ export default function Series() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [flash, setFlash] = useState(null);
+  // null means "let the server decide"; set once the ladder is known.
+  const [quality, setQuality] = useState(null);
 
   const load = useCallback(async (refresh = false) => {
     setError(null);
@@ -53,6 +55,15 @@ export default function Series() {
     return () => clearInterval(t);
   }, [data, load]);
 
+  // Default to the best the title offers, or to whatever an existing monitor
+  // was already set to, so the control opens on the choice already in effect.
+  useEffect(() => {
+    if (!data || quality !== null) return;
+    const offered = data.availableHeights || [];
+    if (offered.length < 2) return;
+    setQuality(data.monitor?.maxHeight || offered[0]);
+  }, [data, quality]);
+
   const pending = useMemo(
     () => (data?.episodes || []).filter((e) => !e.onDisk && !e.job),
     [data]
@@ -71,17 +82,20 @@ export default function Series() {
     setBusy(true);
     setError(null);
     try {
+      const body = all ? { all: true } : { episodeIds };
+      if (quality) body.maxHeight = quality;
       const res = await apiPost(
         `/api/series/${seriesId}/request`,
-        all ? { all: true } : { episodeIds },
+        body,
         { timeout: 120000 }
       );
       const n = res.queued?.length || 0;
       const skipped = (res.existing?.length || 0) + (res.onDisk?.length || 0);
+      const at = res.maxHeight ? ` at ${res.maxHeight}p` : '';
       setFlash(
         n === 0
           ? 'Nothing new to queue — those episodes are already here.'
-          : `Queued ${n} episode${n === 1 ? '' : 's'}${skipped ? `, skipped ${skipped} already present` : ''}.`
+          : `Queued ${n} episode${n === 1 ? '' : 's'}${at}${skipped ? `, skipped ${skipped} already present` : ''}.`
       );
       setSelected(new Set());
       await load();
@@ -101,11 +115,14 @@ export default function Series() {
         await apiDelete(`/api/monitors/${data.monitor.id}`);
         setFlash('Monitor removed.');
       } else {
-        const res = await apiPost('/api/monitors', { seriesId, mode }, { timeout: 120000 });
+        const body = { seriesId, mode };
+        if (quality) body.maxHeight = quality;
+        const res = await apiPost('/api/monitors', body, { timeout: 120000 });
+        const at = res.maxHeight ? ` at ${res.maxHeight}p` : '';
         setFlash(
           mode === 'future'
-            ? `Monitoring future episodes (from episode ${(res.baseline ?? 0) + 1} onward).`
-            : 'Monitoring — every episode not already on disk will be queued.'
+            ? `Monitoring future episodes${at} (from episode ${(res.baseline ?? 0) + 1} onward).`
+            : `Monitoring${at} — every episode not already on disk will be queued.`
         );
       }
       await load();
@@ -160,10 +177,34 @@ export default function Series() {
               <span>{data.episodes.length} episodes</span>
               {onDiskCount > 0 && <span className="ok">{onDiskCount} downloaded</span>}
               {monitor?.enabled && (
-                <span className="mon"><Radar size={13} /> monitoring {monitor.mode}</span>
+                <span className="mon">
+                  <Radar size={13} /> monitoring {monitor.mode}
+                  {monitor.maxHeight ? ` · ${monitor.maxHeight}p` : ''}
+                </span>
               )}
             </div>
             {data.description && <p className="hero-desc">{data.description}</p>}
+
+            {(data.availableHeights || []).length > 1 && (
+              <div className="quality-picker">
+                <span className="quality-label">Quality</span>
+                <div className="quality-options">
+                  {data.availableHeights.map((h) => (
+                    <button
+                      key={h}
+                      className={`quality-btn ${quality === h ? 'active' : ''}`}
+                      onClick={() => setQuality(h)}
+                      disabled={busy}
+                    >
+                      {h}p
+                    </button>
+                  ))}
+                </div>
+                <span className="quality-note">
+                  applies to downloads and monitoring
+                </span>
+              </div>
+            )}
 
             <div className="hero-actions">
               <button

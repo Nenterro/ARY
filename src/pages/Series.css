@@ -266,3 +266,72 @@
     font-size: 0.85rem;
   }
 }
+
+/* QUALITY PICKER — only rendered when the title offers more than one option */
+.quality-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.quality-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quality-options {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 3px;
+}
+
+.quality-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.quality-btn:hover:not(:disabled):not(.active) {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-primary);
+}
+
+.quality-btn.active {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: 0 4px 14px -6px var(--accent-glow);
+}
+
+.quality-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quality-note {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 767px) {
+  .quality-note { display: none; }
+
+  .quality-picker {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+}
